@@ -1,11 +1,11 @@
 #include <cstdio>
 #include <cstring>
-#include <taglib/attachedpictureframe.h>
-#include <taglib/fileref.h>
-#include <taglib/flacfile.h>
-#include <taglib/id3v2tag.h>
-#include <taglib/mpegfile.h>
-#include <taglib/tbytevectorstream.h>
+#include <attachedpictureframe.h>
+#include <fileref.h>
+#include <flacfile.h>
+#include <id3v2tag.h>
+#include <mpegfile.h>
+#include <tbytevectorstream.h>
 
 struct Vec {
   char *ptr;

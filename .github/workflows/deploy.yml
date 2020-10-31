@@ -1,0 +1,29 @@
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: sudo apt install libtag1-dev
+      - name: Setup emsdk
+        uses: mymindstorm/setup-emsdk@v7
+        with:
+          version: 'latest'
+          actions-cache-folder: 'emsdk-cache'
+      - name: Setup rust
+        run: |
+          rustup default nightly
+          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - run: make -j4
+      - run: cd www && npm install && npm run build && cp ncmdump_rs_bg.wasm dist
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@2.0.2
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BASE_BRANCH: wasm
+          BRANCH: gh-pages
+          FOLDER: www/dist

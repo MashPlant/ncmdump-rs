@@ -1,0 +1,20 @@
+{
+  "name": "ncmdump",
+  "version": "0.1.0",
+  "description": "netease cloud music copyright protection file dump",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "start": "webpack-dev-server"
+  },
+  "author": "MashPlant",
+  "devDependencies": {
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.5",
+    "copy-webpack-plugin": "^5.0.0"
+  },
+  "dependencies": {
+    "file-saver": "^2.0.2"
+  }
+}

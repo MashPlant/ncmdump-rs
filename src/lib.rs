@@ -1,10 +1,50 @@
-use std::fmt;
+use std::{fmt, alloc::{GlobalAlloc, Layout}};
 use aes::{Aes128, cipher::{generic_array::GenericArray, {BlockCipher, NewBlockCipher}}};
 use serde::{Deserializer, Deserialize};
 use FormatError::*;
+use wasm_bindgen::prelude::*;
+
+struct Malloc;
+
+extern "C" {
+  fn malloc(size: usize) -> *mut u8;
+  fn free(ptr: *mut u8);
+  fn realloc(ptr: *mut u8, size: usize) -> *mut u8;
+}
+
+unsafe impl GlobalAlloc for Malloc {
+  unsafe fn alloc(&self, layout: Layout) -> *mut u8 { malloc(layout.size()) }
+  unsafe fn dealloc(&self, ptr: *mut u8, _layout: Layout) { free(ptr); }
+  unsafe fn realloc(&self, ptr: *mut u8, _layout: Layout, new_size: usize) -> *mut u8 { realloc(ptr, new_size) }
+}
+
+#[global_allocator]
+static A: Malloc = Malloc;
+
+#[repr(C)]
+pub struct Ret {
+  err: usize,
+  format: usize,
+  buf: Vec<u8>,
+}
+
+#[no_mangle]
+pub static mut RET: Ret = Ret { err: 0, format: 0, buf: Vec::new() };
+
+#[wasm_bindgen]
+pub fn work(ncm: &mut [u8]) {
+  match transform(ncm) {
+    Ok(data) => unsafe {
+      RET.err = 0;
+      RET.format = data.format as usize;
+      RET.buf = data.data;
+    }
+    Err(err) => unsafe { RET.err = err as usize; }
+  }
+}
 
 #[derive(Debug)]
-pub enum FormatError { UnexpectedEof, BadMagic, BadAes, BadBase64, BadLength, BadMetadata }
+pub enum FormatError { UnexpectedEof = 1, BadMagic, BadAes, BadBase64, BadLength, BadMetadata }
 
 type Result<T> = std::result::Result<T, FormatError>;
 
